@@ -46,7 +46,7 @@ if(isset($_GET['call'])) {
                     $stmt = $object->staffLogin($em, $ps);
                     $row = $stmt->FETCH(PDO::FETCH_ASSOC);
                     $response['success'] = true;
-                    $response['error'] = false;
+                    $response['status'] = "ok";
                     $response['message'] = "Login successful!";
                     $response['details'][] = $row;
                     echo json_encode($response);
@@ -78,16 +78,41 @@ if(isset($_GET['call'])) {
         if($object->countStaffMembers() > 0) {
             $stmt = $object->viewStaffMembers();
             while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
-                $response['success'] = "1";
+                $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countStaffMembers();
                 $response["staffs"][] = $row;
             }
             echo json_encode($response);
         } else {
-            $response['success'] = "0";
+            $response['success'] = false;
+            $response["counts"] = $object->countStaffMembers();
             $response['message'] = "No data found!";
             echo json_encode($response);
         }
         break;
+
+
+
+        case 'v_lecturers':
+        $response = array();
+        if($object->countLecturers() > 0) {
+            $stmt = $object->viewLecturers();
+            while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
+                $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countLecturers();
+                $response["lecturers"][] = $row;
+            }
+            echo json_encode($response);
+        } else {
+            $response['success'] = false;
+            $response["counts"] = $object->countLecturers();
+            $response['message'] = "No data found!";
+            echo json_encode($response);
+        }
+        break;
+
 
 
 
@@ -109,11 +134,14 @@ if(isset($_GET['viewstaff'])) {
         if($object->countStaffMember($staff_id) > 0) {
             $stmt = $object->viewStaffMember($staff_id);
             $row = $stmt->FETCH(PDO::FETCH_ASSOC);
-            $response['success'] = "1";
+            $response['success'] = true;
+            $response['status'] = "fetched";
+            $response["counts"] = $object->countStaffMember($staff_id);
             $response["staff"][] = $row;
             echo json_encode($response);
         } else {
-            $response['success'] = "0";
+            $response['success'] = false;
+            $response["counts"] = $object->countStaffMember($staff_id);
             $response['message'] = "No data with ".$staff_id." found!";
             echo json_encode($response);
         }
@@ -121,6 +149,7 @@ if(isset($_GET['viewstaff'])) {
         echo "Server error!";
     }
 }
+
 
 
 // get me like this: staff/delete/2

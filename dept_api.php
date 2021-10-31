@@ -45,11 +45,14 @@ if(isset($_GET['call'])) {
             $stmt = $object->viewDepartments();
             while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
                 $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countDepartments();
                 $response["departments"][] = $row;
             }
             echo json_encode($response);
         } else {
             $response['success'] = false;
+            $response["counts"] = $object->countDepartments();
             $response['message'] = "No data found!";
             echo json_encode($response);
         }
@@ -77,10 +80,13 @@ if(isset($_GET['viewdept'])) {
             $stmt = $object->viewDepartment($id);
             $row = $stmt->FETCH(PDO::FETCH_ASSOC);
             $response['success'] = true;
+            $response['status'] = "fetched";
+            $response["counts"] = $object->countDepartment($id);
             $response["department"][] = $row;
             echo json_encode($response);
         } else {
             $response['success'] = false;
+            $response["counts"] = $object->countDepartment($id);
             $response['message'] = "No data with ".$id." id found!";
             echo json_encode($response);
         }
@@ -90,6 +96,34 @@ if(isset($_GET['viewdept'])) {
         echo json_encode($response);
     }
 }
+
+
+if(isset($_GET['viewDeptName'])) {
+    $response = array();
+    if($_SERVER['REQUEST_METHOD']) {    
+        $name = $_GET['viewDeptName'];
+        
+        if($object->countDepartmentByName($name) > 0) {
+            $stmt = $object->viewDepartmentByName($name);
+            $row = $stmt->FETCH(PDO::FETCH_ASSOC);
+            $response['success'] = true;
+            $response['status'] = "fetched";
+            $response["counts"] = $object->countDepartmentByName($name);
+            $response["department"][] = $row;
+            echo json_encode($response);
+        } else {
+            $response['success'] = false;
+            $response["counts"] = $object->countDepartmentByName($name);
+            $response['message'] = "No data with ".$name." id found!";
+            echo json_encode($response);
+        }
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Server error!";
+        echo json_encode($response);
+    }
+}
+
 
 
 // get me like this: department/delete/2

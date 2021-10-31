@@ -11,12 +11,11 @@ if(isset($_GET['call'])) {
         if($_SERVER['REQUEST_METHOD']=='POST') {
             $name = $_POST['module_name'];
             $code = $_POST['module_code'];
-            $dept_id = $_POST['dept_id'];
             $lect_id = $_POST['lecturer_id'];
 
             if($object->checkModuleExistence($code)==0){
-                if($name!='' && $code!='' && $dept_id!='' && $lect_id!=''){
-                    if($object->registerModule($name, $code, $dept_id, $lect_id)==1) {
+                if($name!='' && $code!='' && $lect_id!=''){
+                    if($object->registerModule($name, $code, $lect_id)==1) {
                         if($object->checkAssignedModule($code, $lect_id)==0) {
                             $response['success'] = true;
                             $response['message'] = "Module ".$name." is added!";
@@ -57,12 +56,15 @@ if(isset($_GET['call'])) {
         if($object->countModules() > 0) {
             $stmt = $object->viewModules();
             while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countModules();
                 $response['success'] = true;
                 $response["modules"][] = $row;
             }
             echo json_encode($response);
         } else {
             $response['success'] = false;
+            $response["counts"] = $object->countModules();
             $response['message'] = "No data found!";
             echo json_encode($response);
         }
@@ -89,10 +91,13 @@ if(isset($_GET['viewmod'])) {
             $stmt = $object->viewModule($id);
             $row = $stmt->FETCH(PDO::FETCH_ASSOC);
             $response['success'] = true;
+            $response['status'] = "fetched";
+            $response["counts"] = $object->countModule($id);
             $response["module"][] = $row;
             echo json_encode($response);
         } else {
             $response['success'] = false;
+            $response["counts"] = $object->countModule($id);
             $response['message'] = "No data with ".$id." id found!";
             echo json_encode($response);
         }
@@ -102,6 +107,38 @@ if(isset($_GET['viewmod'])) {
         echo json_encode($response);
     }
 }
+
+
+// View modules by lecturer
+if(isset($_GET['modlect'])) {
+    $response = array();
+    if($_SERVER['REQUEST_METHOD']) {    
+        $id = $_GET['modlect'];
+        
+        if($object->countModuleByLecturer($id) > 0) {
+            $stmt = $object->viewModuleByLecturer($id);
+
+            while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
+                $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countModuleByLecturer($id);
+                $response["modulelects"][] = $row;
+            }
+
+            echo json_encode($response);
+        } else {
+            $response['success'] = false;
+            $response["counts"] = $object->countModuleByLecturer($id);
+            $response['message'] = "No data with ".$id." id found!";
+            echo json_encode($response);
+        }
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Server error!";
+        echo json_encode($response);
+    }
+}
+
 
 
 if(isset($_GET['deletemod'])) {
@@ -139,12 +176,11 @@ if(isset($_GET['updatemod'])) {
         $id = $_GET['updatemod'];
         $name = $_POST['module_name'];
         $code = $_POST['module_code'];
-        $dept_id = $_POST['dept_id'];
         $lect_id = $_POST['lecturer_id'];
 
-        if($name!='' && $code!='' && $dept_id!='' && $lect_id!=''){
+        if($name!='' && $code!='' && $lect_id!=''){
             if($id!='' && ($object->countModule($id)>0) && $object->checkModuleExistence($code)==0){
-                $object->updateModule($id, $name, $code, $dept_id, $lect_id);
+                $object->updateModule($id, $name, $code, $lect_id);
                 $response['success'] = true;
                 $response["message"] = "Updation is successful";
                 echo json_encode($response);

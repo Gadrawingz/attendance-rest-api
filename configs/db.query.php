@@ -45,6 +45,13 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
+	public function viewLecturers() {
+		$sql= "SELECT * FROM staff WHERE staff_role='LECTURER' ";
+		$stmt=$this->conLink->prepare($sql);
+		$stmt->execute();
+		return $stmt;
+	}
+
 	public function viewStaffMember($staff_id) {
 		$sql = " SELECT * FROM staff WHERE staff_id =? ";
 		$stmt= $this->conLink->prepare($sql);
@@ -78,7 +85,13 @@ class Query extends DBConnection {
 		$sql = "SELECT COUNT(*) FROM staff ";
 		$stmt= $this->conLink->query($sql)->fetchColumn();
 		return $stmt;
-	} 
+	}
+
+	public function countLecturers() {
+		$sql = "SELECT COUNT(*) FROM staff WHERE staff_role='LECTURER' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
 
 
 	/*****************************************
@@ -108,6 +121,13 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
+	public function viewDepartmentByName($name) {
+		$sql = "SELECT * FROM department WHERE dept_name =? ";
+		$stmt= $this->conLink->prepare($sql);
+		$stmt->execute([$name]);
+		return $stmt;
+	}
+
 	public function updateDepartment($id, $name, $caption) {
 		$sql="UPDATE department SET dept_name='$name', dept_caption='$caption' WHERE dept_id='$id' ";
 		$query= $this->conLink->prepare($sql);
@@ -129,6 +149,12 @@ class Query extends DBConnection {
 
 	public function countDepartment($id) {
 		$sql = "SELECT COUNT(*) FROM department WHERE dept_id='$id' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
+	public function countDepartmentByName($name) {
+		$sql = "SELECT COUNT(*) FROM department WHERE dept_name='$name' ";
 		$stmt= $this->conLink->query($sql)->fetchColumn();
 		return $stmt;
 	}
@@ -156,21 +182,21 @@ class Query extends DBConnection {
 	}
 
 	public function viewClassrooms() {
-		$sql= "SELECT * FROM class ";
+		$sql= "SELECT cl.class_id, cl.class_name, cl.class_level, cl.dept_id, dp.dept_name, dp.dept_caption FROM class cl JOIN department dp ON cl.dept_id=dp.dept_id ";
 		$stmt=$this->conLink->prepare($sql);
 		$stmt->execute();
 		return $stmt;
 	}
 
 	public function viewClassroom($id) {
-		$sql = "SELECT * FROM class WHERE class_id =? ";
+		$sql = "SELECT cl.class_id, cl.class_name, cl.class_level, cl.dept_id, dp.dept_name, dp.dept_caption FROM class cl JOIN department dp ON cl.dept_id=dp.dept_id WHERE class_id =? ";
 		$stmt= $this->conLink->prepare($sql);
 		$stmt->execute([$id]);
 		return $stmt;
 	}
 
 	public function viewClassGroup($id) {
-		$sql = "SELECT * FROM class WHERE class_id =? ";
+		$sql = "SELECT cl.class_id, cl.class_name, cl.class_level, cl.dept_id, dp.dept_name, dp.dept_caption FROM class cl JOIN department dp ON cl.dept_id=dp.dept_id WHERE class_id =? ";
 		$stmt= $this->conLink->prepare($sql);
 		$stmt->execute([$id]);
 		return $stmt;
@@ -199,11 +225,6 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
-	public function countClassGroup($id) {
-		$sql = "SELECT COUNT(*) FROM class WHERE class_id='$id' ";
-		$stmt= $this->conLink->query($sql)->fetchColumn();
-		return $stmt;
-	}
 
 	public function countClassroom($id) {
 		$sql = "SELECT COUNT(*) FROM class WHERE class_id='$id' ";
@@ -248,6 +269,13 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
+	public function viewStudentByClass($id) {
+		$sql = "SELECT * FROM student WHERE class_id=? ORDER BY student_id ASC";
+		$stmt= $this->conLink->prepare($sql);
+		$stmt->execute([$id]);
+		return $stmt;
+	}
+
 	public function updateStudent($id, $fn, $ln, $rg, $em, $ph, $gd, $ci) {
 		$sql="UPDATE student SET firstname='$fn', lastname='$ln', reg_number='$rg', email='$em', telephone='$ph', gender='$gd', class_id='$ci' WHERE student_id='$id' ";
 		$query= $this->conLink->prepare($sql);
@@ -277,6 +305,12 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
+	public function countStudentByClass($id) {
+		$sql = "SELECT COUNT(*) FROM student WHERE class_id='$id' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
 	public function countStudents() {
 		$sql = "SELECT COUNT(*) FROM student ";
 		$stmt= $this->conLink->query($sql)->fetchColumn();
@@ -292,8 +326,8 @@ class Query extends DBConnection {
 	 * COPYRIGHT @DONNEKT 2021 SEPTEMBER
 	 * ***************************************/
 
-	public function registerModule($name, $code, $dept_id, $lect_id) {
-		$sql= "INSERT INTO module(module_name, module_code, dept_id, lecturer_id) VALUES ('$name', '$code', '$dept_id', '$lect_id')";
+	public function registerModule($name, $code, $lect_id) {
+		$sql= "INSERT INTO module(module_name, module_code, lecturer_id) VALUES ('$name', '$code', '$lect_id')";
 		$query= $this->conLink->prepare($sql);
 		$query->execute();
 		$count= $query->rowCount();
@@ -301,21 +335,29 @@ class Query extends DBConnection {
 	}
 
 	public function viewModules() {
-		$sql= "SELECT * FROM module ";
+		$sql= "SELECT md.module_id, md.module_name, md.module_code, st.staff_id AS lecturer_id, st.firstname, st.lastname, st.telephone, st.email, st.staff_role FROM module md JOIN staff st ON st.staff_id=md.lecturer_id ";
 		$stmt=$this->conLink->prepare($sql);
 		$stmt->execute();
 		return $stmt;
 	}
 
+	// View single module
 	public function viewModule($id) {
-		$sql = "SELECT * FROM module WHERE module_id=? ";
+		$sql = "SELECT md.module_id, md.module_name, md.module_code, st.staff_id AS lecturer_id, st.firstname, st.lastname, st.telephone, st.email, st.staff_role FROM module md JOIN staff st ON st.staff_id=md.lecturer_id WHERE module_id=? ";
 		$stmt= $this->conLink->prepare($sql);
 		$stmt->execute([$id]);
 		return $stmt;
 	}
 
-	public function updateModule($id, $name, $code, $dept_id, $lect_id) {
-		$sql="UPDATE module SET module_name='$name', module_code='$code', dept_id='$dept_id', lecturer_id='$lect_id' WHERE module_id='$id' ";
+	public function viewModuleByLecturer($id) {
+		$sql = "SELECT md.module_id, md.module_name, md.module_code, st.staff_id AS lecturer_id, st.firstname, st.lastname, st.telephone, st.email, st.staff_role FROM module md JOIN staff st ON st.staff_id=md.lecturer_id WHERE lecturer_id=?";
+		$stmt= $this->conLink->prepare($sql);
+		$stmt->execute([$id]);
+		return $stmt;
+	}
+
+	public function updateModule($id, $name, $code, $lect_id) {
+		$sql="UPDATE module SET module_name='$name', module_code='$code', lecturer_id='$lect_id' WHERE module_id='$id' ";
 		$query= $this->conLink->prepare($sql);
 		$query->execute();
 		$count= $query->rowCount();
@@ -337,8 +379,26 @@ class Query extends DBConnection {
 		return $stmt;
 	}
 
+	public function checkForTooMuchAssigning($lecturer) {
+		$sql = "SELECT COUNT(*) FROM module WHERE lecturer_id='$lecturer' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
 	public function checkAssignedModule($code, $lect_id) {
 		$sql = "SELECT COUNT(*) FROM module WHERE module_code='$code' AND lecturer_id='$lect_id' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
+	public function countModuleByLecturer($id) {
+		$sql = "SELECT COUNT(*) FROM module WHERE lecturer_id='$id' ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
+	public function countModuleByDept($id) {
+		$sql = "SELECT COUNT(*) FROM module WHERE dept_id='$id' ";
 		$stmt= $this->conLink->query($sql)->fetchColumn();
 		return $stmt;
 	}
@@ -353,11 +413,57 @@ class Query extends DBConnection {
 		$sql = "SELECT COUNT(*) FROM module ";
 		$stmt= $this->conLink->query($sql)->fetchColumn();
 		return $stmt;
-	} 
+	}
+
+	/*****************************************
+	 * READY-MADE/SIMPLIFIED API FOR SH**
+	 * DEVELEPED AT DONNEKT/GADRAWINGZ
+	 * COPYRIGHT @DONNEKT 2021 SEPTEMBER
+	 * ***************************************/
+
+	public function makeAttendance($status, $student, $lect_id, $module, $academic, $day) {
+		$sql= "INSERT INTO `attendance`(`att_status`, `student_id`, `lecturer_id`, `module_id`, `acad_year`, `att_day`) VALUES ('$status', '$student', '$lect_id', '$module', '$academic', '$day')";
+		$query= $this->conLink->prepare($sql);
+		$query->execute();
+		$count= $query->rowCount();
+		return $count; 
+	}
+
+	public function viewAttendanceDetails() {
+		$sql= "SELECT * FROM attendance ";
+		$stmt=$this->conLink->prepare($sql);
+		$stmt->execute();
+		return $stmt;
+	}
+
+	public function checkForAttRedundance($module, $student, $att_day) {
+		$sql = "SELECT COUNT(*) FROM attendance WHERE (module_id='$module' AND student_id='$student' AND att_day='$att_day')";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
+
+	public function countAttendance() {
+		$sql = "SELECT COUNT(*) FROM attendance ";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
 
 
 
+	// Misc
+	public function createClassGroup($module_id, $class_id) {
+		$sql= "INSERT INTO classign (`module_id`, `class_id`) VALUES ('$module_id', '$class_id')";
+		$query= $this->conLink->prepare($sql);
+		$query->execute();
+		$count= $query->rowCount();
+		return $count; 
+	}
 
+	public function countClassGroup($module_id, $class_id) {
+		$sql= "SELECT COUNT(*) FROM classign WHERE module_id='$module_id' AND class_id='$class_id'";
+		$stmt= $this->conLink->query($sql)->fetchColumn();
+		return $stmt;
+	}
 
 
 }

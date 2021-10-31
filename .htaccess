@@ -12,6 +12,8 @@ RewriteRule ^staff/update/([a-zA-Z0-9_-]+)$ staff_api?updatestaff=$1
 RewriteRule ^staff/delete/([a-zA-Z0-9_-]+)$ staff_api?deletestaff=$1
 
 RewriteRule ^department/view/([a-zA-Z0-9_-]+)$ dept_api?viewdept=$1
+RewriteRule ^department/name/([a-zA-Z0-9_-]+)$ dept_api?viewdept=$1
+
 RewriteRule ^department/update/([a-zA-Z0-9_-]+)$ dept_api?updatedept=$1
 RewriteRule ^department/delete/([a-zA-Z0-9_-]+)$ dept_api?deletedept=$1
 
@@ -20,9 +22,12 @@ RewriteRule ^classroom/update/([a-zA-Z0-9_-]+)$ class_api?updateclass=$1
 RewriteRule ^classroom/delete/([a-zA-Z0-9_-]+)$ class_api?deleteclass=$1
 
 RewriteRule ^student/view/([a-zA-Z0-9_-]+)$ student_api?viewstud=$1
+RewriteRule ^student/class/([a-zA-Z0-9_-]+)$ student_api?studclass=$1
 RewriteRule ^student/update/([a-zA-Z0-9_-]+)$ student_api?updatestud=$1
 RewriteRule ^student/delete/([a-zA-Z0-9_-]+)$ student_api?deletestud=$1
 
 RewriteRule ^module/view/([a-zA-Z0-9_-]+)$ module_api?viewmod=$1
+RewriteRule ^module/lect/([a-zA-Z0-9_-]+)$ module_api?modlect=$1
+RewriteRule ^module/dept/([a-zA-Z0-9_-]+)$ module_api?moddept=$1
 RewriteRule ^module/update/([a-zA-Z0-9_-]+)$ module_api?updatemod=$1
 RewriteRule ^module/delete/([a-zA-Z0-9_-]+)$ module_api?deletemod=$1

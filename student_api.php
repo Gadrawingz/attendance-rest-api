@@ -42,11 +42,8 @@ if(isset($_GET['call'])) {
             $response['message'] = "Server error!";
             echo json_encode($response);
         }
-
+        
         break;
-
-
-
 
 
         case 'view':
@@ -55,11 +52,14 @@ if(isset($_GET['call'])) {
             $stmt = $object->viewStudents();
             while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
                 $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countStudents();
                 $response["students"][] = $row;
             }
             echo json_encode($response);
         } else {
             $response['success'] = "0";
+            $response["counts"] = $object->countStudents();
             $response['message'] = "No data found!";
             echo json_encode($response);
         }
@@ -87,9 +87,42 @@ if(isset($_GET['viewstud'])) {
             $row = $stmt->FETCH(PDO::FETCH_ASSOC);
             $response['success'] = true;
             $response["student"][] = $row;
+            $response['status'] = "fetched";
+            $response["counts"] = $object->viewStudent($id);
             echo json_encode($response);
         } else {
             $response['success'] = false;
+            $response["counts"] = $object->viewStudent($id);
+            $response['message'] = "No data with ".$id." id found!";
+            echo json_encode($response);
+        }
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Server error!";
+        echo json_encode($response);
+    }
+}
+
+
+// Student class
+if(isset($_GET['studclass'])) {
+    $response = array();
+    if($_SERVER['REQUEST_METHOD']) {    
+        $id = $_GET['studclass'];
+        
+        if($object->countStudentByClass($id) > 0) {
+            $stmt = $object->viewStudentByClass($id);
+            while($row = $stmt->FETCH(PDO::FETCH_ASSOC)) {
+                $response['success'] = true;
+                $response['status'] = "fetched";
+                $response["counts"] = $object->countStudentByClass($id);
+                $response["studclasses"][] = $row;
+            }
+            echo json_encode($response);
+
+        } else {
+            $response['success'] = false;
+            $response["counts"] = $object->countStudentByClass($id);
             $response['message'] = "No data with ".$id." id found!";
             echo json_encode($response);
         }
